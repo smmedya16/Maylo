@@ -1,138 +1,359 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Jarvis Panel</title>
-  <style>
-    :root { --bg:#0f172a; --card:#111827; --accent:#ffd200; --fg:#e5e7eb; }
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial}
-    .wrap{max-width:900px;margin:0 auto;padding:24px}
-    .grid{display:grid;gap:16px;grid-template-columns:1fr 1fr}
-    .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 6px 20px #00000066}
-    .title{font-weight:700;font-size:20px;margin:0 0 12px}
-    .big{font-size:42px;font-weight:800}
-    button{background:var(--accent);border:0;border-radius:12px;padding:14px 18px;font-weight:700}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .status{font-size:14px;opacity:.8}
-    .mic{font-size:18px}
-    .log{white-space:pre-wrap;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0b1220;border-radius:12px;padding:12px;max-height:180px;overflow:auto}
-    @media (max-width:720px){ .grid{grid-template-columns:1fr} .big{font-size:34px}}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>JARVIS • Home Console</title>
+<style>
+  :root{
+    --bg:#0a0f1a;            /* koyu mavi/siyah */
+    --panel:#0d1422cc;       /* cam panel */
+    --stroke:#0ef;           /* neon cyan */
+    --accent:#25ffd8;        /* mint */
+    --text:#e6f6ff;          /* açık yazı */
+    --muted:#8fbad1;         /* ikincil yazı */
+    --danger:#ff4f64;
+    --ok:#35f0a3;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:radial-gradient(1200px 800px at 20% -10%,#11223a 0%,#0a0f1a 50%,#060a12 100%);
+    color:var(--text);font-family:system-ui,Segoe UI,Roboto,Inter,Arial;
+    overflow-x:hidden;
+  }
+
+  /* neon ızgara */
+  .grid-bg{
+    position:fixed;inset:0;pointer-events:none;opacity:.25;
+    background:
+      radial-gradient(800px 400px at 80% 110%, rgba(0,255,255,.08), transparent 60%),
+      repeating-linear-gradient(90deg, rgba(0,255,255,.04) 0 1px, transparent 1px 60px),
+      repeating-linear-gradient(0deg,  rgba(0,255,255,.04) 0 1px, transparent 1px 60px);
+    filter:drop-shadow(0 0 6px rgba(0,255,255,.35));
+  }
+
+  .wrap{max-width:1200px;margin:0 auto;padding:24px}
+
+  /* header */
+  .hdr{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  .logo{
+    width:42px;height:42px;border-radius:50%;
+    background:conic-gradient(from 0deg,var(--stroke),transparent 30%,var(--accent));
+    box-shadow:0 0 20px var(--stroke), inset 0 0 10px #000;
+    position:relative;
+  }
+  .logo::after{
+    content:"";position:absolute;inset:7px;border-radius:50%;
+    border:2px solid var(--stroke);
+    box-shadow:0 0 18px var(--stroke);
+  }
+  .title{font-weight:800;letter-spacing:.12em}
+  .sub{color:var(--muted);font-size:13px}
+
+  /* layout */
+  .grid{
+    display:grid;gap:16px;
+    grid-template-columns: 1.2fr 1fr .9fr;
+  }
+  @media (max-width:1100px){ .grid{grid-template-columns:1fr 1fr} }
+  @media (max-width:780px){  .grid{grid-template-columns:1fr} }
+
+  .card{
+    background:var(--panel);
+    border:1px solid rgba(0,255,255,.18);
+    border-radius:18px;padding:16px;
+    backdrop-filter: blur(10px) saturate(120%);
+    box-shadow:0 0 0 1px rgba(0,255,255,.08), 0 15px 40px #0008;
+  }
+  .card h3{margin:0 0 12px;font-size:15px;font-weight:800;letter-spacing:.14em;color:#bff}
+  .muted{color:var(--muted)}
+
+  /* radar */
+  .radar{
+    --size:360px; width:var(--size); aspect-ratio:1/1; margin:auto;
+    border-radius:50%; position:relative; overflow:hidden;
+    background:
+      radial-gradient(circle at center, transparent 40%, rgba(0,255,255,.06) 41% 100%),
+      conic-gradient(from 0deg, rgba(0,255,255,.15), transparent 40%, rgba(0,255,255,.15) 60%, transparent 100%);
+    border:1px solid rgba(0,255,255,.35);
+    box-shadow:0 0 25px rgba(0,255,255,.35), inset 0 0 35px rgba(0,255,255,.25);
+  }
+  .sweep{
+    position:absolute; inset:0; transform-origin:50% 50%; 
+    background:conic-gradient(from 0deg, rgba(0,255,255,.25), transparent 35%);
+    animation:sweep 3.5s linear infinite;
+    mix-blend-mode:screen; filter:blur(2px);
+  }
+  @keyframes sweep{ to{ transform:rotate(360deg) } }
+  .ticks::before,.ticks::after{
+    content:""; position:absolute;inset:0; border-radius:50%;
+    border:1px dashed rgba(0,255,255,.25);
+    box-shadow:inset 0 0 10px rgba(0,255,255,.3);
+  }
+  .ticks::after{ transform:scale(.66) }
+
+  /* big clock */
+  .clock{display:flex;align-items:baseline;gap:10px}
+  .time{font-size:56px;font-weight:900;text-shadow:0 0 20px rgba(0,255,255,.3)}
+  .date{color:#bde;letter-spacing:.04em}
+
+  /* buttons */
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn{
+    position:relative; isolation:isolate;
+    background:linear-gradient(180deg,#072934,#03141b);
+    border:1px solid rgba(0,255,255,.35);
+    color:var(--text); padding:12px 14px; border-radius:12px; font-weight:700;
+    box-shadow:0 6px 18px #0009, inset 0 0 12px rgba(0,255,255,.12);
+    cursor:pointer;
+  }
+  .btn::after{ /* neon kenar */
+    content:""; position:absolute; inset:-2px; border-radius:14px;
+    border:1px solid rgba(0,255,255,.25); filter:blur(6px); z-index:-1;
+  }
+  .btn.small{padding:9px 12px;font-weight:600}
+  .chip{border:1px solid rgba(0,255,255,.25);padding:4px 8px;border-radius:20px;color:#bff;font-size:12px}
+
+  /* status list */
+  .kv{display:grid;grid-template-columns:120px 1fr; gap:6px 12px; font-size:14px}
+  .ok{color:var(--ok)} .danger{color:var(--danger)}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+
+  /* log */
+  .log{
+    background:#06101b;border:1px solid rgba(0,255,255,.25);
+    border-radius:12px;padding:10px; height:140px; overflow:auto;
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px;
+  }
+
+  /* mini gauge */
+  .gauge{
+    display:flex; gap:10px; align-items:center
+  }
+  .bar{height:10px; flex:1; background:#0b2230; border:1px solid rgba(0,255,255,.25); border-radius:20px; overflow:hidden}
+  .fill{height:100%; width:0; background:linear-gradient(90deg,var(--stroke),var(--accent)); box-shadow:0 0 14px var(--stroke)}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="grid">
-      <div class="card">
-        <div class="title">Saat & Tarih</div>
-        <div id="clock" class="big">--:--</div>
-        <div id="date" class="status">—</div>
-      </div>
+<div class="grid-bg"></div>
 
-      <div class="card">
-        <div class="title">Hızlı Kontrol</div>
-        <div class="row">
-          <button onclick="toggleLight('light.salon')">Salon Işık</button>
-          <button onclick="setTemp('climate.ev', 24)">Klima 24°</button>
-          <span id="ctrlStatus" class="status"></span>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="title">Sesli Komut</div>
-        <div class="row">
-          <button class="mic" id="recBtn" onclick="record()">🎤 Bas-Konuş</button>
-          <span id="recStatus" class="status"></span>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button onclick="speak('Salon ışığı açıldı')">🔊 Test: TTS</button>
-        </div>
-        <div id="sttOut" class="log" style="margin-top:12px"></div>
-      </div>
-
-      <div class="card">
-        <div class="title">Notlar</div>
-        <div class="log" id="logBox">Hazır.</div>
-      </div>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo"></div>
+    <div>
+      <div class="title">J A R V I S  •  H O M E  C O N S O L E</div>
+      <div class="sub">Local node online · Secured over HTTPS · Mic enabled</div>
     </div>
   </div>
 
+  <div class="grid">
+    <!-- LEFT: Radar + Clock -->
+    <div class="card">
+      <h3>CORE VISOR</h3>
+      <div class="radar">
+        <div class="sweep"></div>
+        <div class="ticks"></div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="clock">
+        <div id="time" class="time">--:--</div>
+        <div id="date" class="date">—</div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="chip">Uptime: <span id="uptime">—</span></span>
+        <span class="chip">LAN: <span id="lan">—</span></span>
+        <span class="chip">Backend: <span id="backendStat">OFF</span></span>
+      </div>
+    </div>
+
+    <!-- MIDDLE: Controls + Routines -->
+    <div class="card">
+      <h3>COMMANDS</h3>
+      <div class="row">
+        <button class="btn" onclick="toggleLight('light.salon')">Salon Işık</button>
+        <button class="btn" onclick="toggleLight('light.mutfak')">Mutfak Işık</button>
+        <button class="btn" onclick="setClimate('climate.ev',24)">Klima 24°</button>
+        <button class="btn" onclick="setClimate('climate.ev',22)">Klima 22°</button>
+      </div>
+      <div style="height:12px"></div>
+      <div class="row">
+        <button class="btn small" onclick="runScene('scene.film')">🎬 Film Modu</button>
+        <button class="btn small" onclick="runScene('scene.gece')">🌙 Gece Modu</button>
+        <button class="btn small" onclick="runScene('scene.evden_cik')">🚪 Evden Çık</button>
+        <span id="ctrlStatus" class="muted"></span>
+      </div>
+
+      <div style="height:16px"></div>
+      <h3>POWER • NETWORK</h3>
+      <div class="gauge">
+        <div class="muted" style="width:80px">CPU</div>
+        <div class="bar"><div id="cpuFill" class="fill"></div></div>
+        <div class="mono" id="cpuPct">0%</div>
+      </div>
+      <div class="gauge" style="margin-top:8px">
+        <div class="muted" style="width:80px">RAM</div>
+        <div class="bar"><div id="ramFill" class="fill"></div></div>
+        <div class="mono" id="ramPct">0%</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Voice + Weather + Log -->
+    <div class="card">
+      <h3>VOICE LINK</h3>
+      <div class="row">
+        <button id="recBtn" class="btn" onclick="record()">🎤 Bas-Konuş</button>
+        <button class="btn" onclick="speak('Komut alındı. İşlem uygulanıyor.')">🔊 TTS Test</button>
+      </div>
+      <div class="muted" id="recStatus" style="margin:8px 2px 0">Hazır</div>
+      <div class="log" id="sttOut" style="margin-top:10px">Transcript burada görünecek…</div>
+
+      <div style="height:12px"></div>
+      <h3>WEATHER</h3>
+      <div class="kv">
+        <div class="muted">Konum</div><div id="wCity">—</div>
+        <div class="muted">Sıcaklık</div><div id="wTemp">—</div>
+        <div class="muted">Durum</div><div id="wDesc">—</div>
+      </div>
+
+      <div style="height:12px"></div>
+      <h3>EVENT LOG</h3>
+      <div class="log" id="logBox">System online.</div>
+    </div>
+  </div>
+</div>
+
 <script>
-// ==== Saat ====
-function tick(){
-  const d=new Date();
-  const pad=n=>String(n).padStart(2,'0');
-  clock.textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  date.textContent=d.toLocaleDateString('tr-TR',{weekday:'long', day:'2-digit', month:'long', year:'numeric'});
-}
-setInterval(tick,1000); tick();
-
-// ==== Backend örnekleri (adresini kendine göre değiştir) ====
-const API_BASE = 'https://ornek-backend-adresin.com';
-
-async function toggleLight(entity){
-  ctrlStatus.textContent='Işık komutu gönderiliyor...';
-  await new Promise(r=>setTimeout(r,700));
-  ctrlStatus.textContent='Salon ışık: KOMUT GÖNDERİLDİ';
-  log('Işık toggle gönderildi.');
+/* ====== UTIL ====== */
+const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+function log(msg){
+  const t = new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  logBox.textContent += `\n[${t}] ${msg}`;
+  logBox.scrollTop = logBox.scrollHeight;
 }
 
-async function setTemp(entity,temp){
-  ctrlStatus.textContent='Klima ayarlanıyor...';
-  await new Promise(r=>setTimeout(r,700));
-  ctrlStatus.textContent=`Klima ${temp}°: KOMUT GÖNDERİLDİ`;
-  log('Klima komutu gönderildi.');
-}
+/* ====== CLOCK / STATUS ====== */
+(function tick(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  time.textContent = `${p(d.getHours())}:${p(d.getMinutes())}`;
+  date.textContent = d.toLocaleDateString('tr-TR',{weekday:'long', day:'2-digit', month:'long'});
+  uptime.textContent = (performance.now()/1000/60).toFixed(0)+' dk';
+  requestAnimationFrame(tick);
+})();
+lan.textContent = location.hostname || 'localhost';
 
-// ==== TTS ====
-function speak(text){
+/* Fake CPU/RAM animasyonu (backend bağlayınca kaldır) */
+setInterval(()=>{
+  const cpu = 22 + Math.round(Math.random()*35);
+  const ram = 30 + Math.round(Math.random()*25);
+  cpuFill.style.width = cpu+'%'; cpuPct.textContent = cpu+'%';
+  ramFill.style.width = ram+'%'; ramPct.textContent = ram+'%';
+}, 1500);
+
+/* ====== BACKEND CONFIG (TODO: düzenle) ====== */
+const API_BASE = 'https://YOUR-BACKEND-URL'; // ← TODO
+// Backend: /api/light/toggle {entity_id}, /api/climate/set {entity_id, temperature}, /api/scene/apply {entity_id}
+// Örnek Node.js iskeleti verdiğim önceki mesajla uyumlu.
+
+/* ====== COMMANDS ====== */
+async function toggleLight(entity_id){
+  ctrlStatus.textContent='Işık komutu gönderiliyor…';
   try{
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang='tr-TR';
-    speechSynthesis.speak(u);
-  }catch(e){ log('TTS desteklenmiyor: '+e.message) }
+    // await fetch(`${API_BASE}/api/light/toggle`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id})});
+    await sleep(600);
+    ctrlStatus.textContent='OK';
+    log('Light toggled: '+entity_id);
+    speakSoft('Işık komutu uygulandı.');
+  }catch(e){ ctrlStatus.textContent='Hata'; log('ERR light: '+e.message) }
+}
+async function setClimate(entity_id, temperature){
+  ctrlStatus.textContent='Klima ayarlanıyor…';
+  try{
+    // await fetch(`${API_BASE}/api/climate/set`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id,temperature})});
+    await sleep(700);
+    ctrlStatus.textContent='OK';
+    log(`Climate set → ${temperature}°`);
+    speakSoft(`Klima ${temperature} dereceye ayarlandı.`);
+  }catch(e){ ctrlStatus.textContent='Hata'; log('ERR climate: '+e.message) }
+}
+async function runScene(entity_id){
+  ctrlStatus.textContent='Sahne çalıştırılıyor…';
+  try{
+    // await fetch(`${API_BASE}/api/scene/apply`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id})});
+    await sleep(700);
+    ctrlStatus.textContent='OK';
+    log('Scene applied: '+entity_id);
+  }catch(e){ ctrlStatus.textContent='Hata'; log('ERR scene: '+e.message) }
 }
 
-// ==== Sesli Kayıt ====
-let media,rec,chunks=[];
+/* ====== TTS ====== */
+function speak(text){
+  try{ const u=new SpeechSynthesisUtterance(text); u.lang='tr-TR'; speechSynthesis.speak(u); }
+  catch(e){ log('TTS yok: '+e.message) }
+}
+function speakSoft(t){ if(!speechSynthesis.speaking) speak(t); }
+
+/* ====== MIC / STT PIPE (demo) ====== */
+/* Not: HTTPS zorunlu. Gerçek STT için backend'e blob gönder:
+   POST ${API_BASE}/stt  -> { text: "..." }
+*/
+let media, rec, chunks=[];
 async function record(){
   try{
-    recStatus.textContent='Mikrofon açılıyor...';
+    recStatus.textContent='Mikrofon açılıyor…';
     media = await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks=[];
-    rec = new MediaRecorder(media);
-    rec.ondataavailable=e=>chunks.push(e.data);
-    rec.onstop=async ()=>{
+    chunks=[]; rec = new MediaRecorder(media);
+    rec.ondataavailable = e=>chunks.push(e.data);
+    rec.onstop = async ()=>{
       const blob = new Blob(chunks,{type:'audio/webm'});
-      recStatus.textContent='Yükleniyor...';
-      await new Promise(r=>setTimeout(r,1000));
-      const text = 'Salon ışığını aç'; // DEMO
-      recStatus.textContent='Hazır';
-      sttOut.textContent = 'STT → ' + text;
-      log('STT çıktı: '+text);
-      if(text.toLowerCase().includes('ışık')) toggleLight('light.salon');
+      recStatus.textContent='Yükleniyor…';
+      try{
+        // const fd = new FormData(); fd.append('audio', blob, 'rec.webm');
+        // const r = await fetch(`${API_BASE}/stt`, { method:'POST', body:fd });
+        // const { text } = await r.json();
+        await sleep(900);
+        const text = 'Salon ışığını aç'; // DEMO
+        sttOut.textContent = text;
+        log('STT: '+text);
+        handleIntent(text);
+        recStatus.textContent='Hazır';
+      }catch(e){ recStatus.textContent='STT hata'; log('ERR stt: '+e.message) }
+      finally{ media.getTracks().forEach(t=>t.stop()); }
     };
     rec.start();
-    recStatus.textContent='Kayıt başladı, bırakmak için tekrar dokun.';
+    recStatus.textContent='Kayıt başladı… Tekrar dokunarak bitir.';
     recBtn.onclick = stopRec;
-  }catch(e){
-    recStatus.textContent='Mikrofon hatası';
-    log('Mic error: '+e.message);
-  }
+  }catch(e){ recStatus.textContent='Mic hata'; log('ERR mic: '+e.message) }
 }
-function stopRec(){
-  rec?.stop();
-  media?.getTracks().forEach(t=>t.stop());
-  recBtn.onclick = record;
-  recStatus.textContent='Kayıt durdu, çözümleme yapılıyor...';
+function stopRec(){ rec?.stop(); recBtn.onclick=record; }
+
+/* Basit niyet çıkarımı (demo) */
+function handleIntent(text){
+  const t = text.toLowerCase();
+  if(t.includes('ışık')) return toggleLight('light.salon');
+  if(t.includes('klima') && t.match(/\d{2}/)){
+    const temp = Number(t.match(/\d{2}/)[0]); return setClimate('climate.ev', temp);
+  }
+  if(t.includes('film')) return runScene('scene.film');
+  speakSoft('Tam anlayamadım, tekrar eder misin?');
 }
 
-// ==== Log ====
-function log(msg){
-  const t = new Date().toLocaleTimeString('tr-TR');
-  logBox.textContent += `\n[${t}] ${msg}`;
-}
+/* ====== WEATHER (örnek / tarayıcı geolokasyon) ====== */
+/* Kendi weather API'ni bağlamak için:
+   fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`)
+*/
+if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const {latitude:lat, longitude:lon}=pos.coords;
+    wCity.textContent = lat.toFixed(3)+', '+lon.toFixed(3);
+    try{
+      // DEMO: sadece sahte değer
+      wTemp.textContent = (22+Math.round(Math.random()*6))+'°C';
+      wDesc.textContent = 'Parçalı bulutlu';
+    }catch{ wDesc.textContent='—' }
+  }, ()=>{ wCity.textContent='İzin verilmedi'; });
+}else{ wCity.textContent='—' }
 </script>
 </body>
-</html>
+        </html>
