@@ -182,19 +182,31 @@
 <div id="adminModal" class="modal" aria-hidden="true">
   <div class="box">
     <h4>YÖNETİCİ DOĞRULAMA</h4>
-    <div class="field">
-      <input id="adminPass" type="password" class="inp" placeholder="Şifre" inputmode="numeric" autocomplete="off"/>
-      <button class="btn" onclick="checkPass()">Giriş</button>
+
+    <!-- PIN GÖRÜNÜMÜ -->
+    <div class="field" style="justify-content:center">
+      <input id="pinDisplay" type="password" class="inp" style="text-align:center;font-size:22px;letter-spacing:6px" disabled>
     </div>
-    <div class="hint">Şifre: <code class="mono">1673</code> (demo)</div>
-    <div style="height:10px"></div>
+
+    <!-- RAKAM TUŞ TAKIMI -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0">
+      <button class="btn" onclick="pressNum('1')">1</button>
+      <button class="btn" onclick="pressNum('2')">2</button>
+      <button class="btn" onclick="pressNum('3')">3</button>
+      <button class="btn" onclick="pressNum('4')">4</button>
+      <button class="btn" onclick="pressNum('5')">5</button>
+      <button class="btn" onclick="pressNum('6')">6</button>
+      <button class="btn" onclick="pressNum('7')">7</button>
+      <button class="btn" onclick="pressNum('8')">8</button>
+      <button class="btn" onclick="pressNum('9')">9</button>
+      <button class="btn" onclick="clearPin()">⌫</button>
+      <button class="btn" onclick="pressNum('0')">0</button>
+      <button class="btn" onclick="checkPin()">OK</button>
+    </div>
+
     <div class="row">
-      <button class="btn" onclick="faceDemo()">🧿 Yüz ile dene (DEMO)</button>
+      <button class="btn small" onclick="faceDemo()">🧿 Yüz ile dene (DEMO)</button>
       <button class="btn small" onclick="closeAdmin()">Kapat</button>
-    </div>
-    <div id="faceArea" style="margin-top:10px;display:none">
-      <video id="cam" playsinline muted></video>
-      <div class="hint">Demo: Kamera 2–3 sn açık kalınca “yüz doğrulandı” sayar.</div>
     </div>
     <div id="adminError" class="danger" style="margin-top:8px"></div>
   </div>
@@ -275,6 +287,28 @@ function grantAdmin(){
 /* Admin actions (örnek) */
 function kioskToggle(){log('Kiosk kilidi (demo)');/* TODO: backend ile gerçek kilit */}
 async function probeBackend(){log('Backend probesi…');try{/*await fetch(`${API_BASE}/health`)*/await sleep(500);backendStat.textContent='ON';log('Backend cevap verdi.')}catch{backendStat.textContent='OFF';}}
+let pin = "";
+function pressNum(n){
+  if(pin.length < 4){ // 4 haneli şifre
+    pin += n;
+    pinDisplay.value = pin;
+  }
+}
+function clearPin(){
+  pin = pin.slice(0,-1);
+  pinDisplay.value = pin;
+}
+function checkPin(){
+  if(pin === "1673"){
+    grantAdmin();
+    closeAdmin();
+  }else{
+    adminError.textContent = "Yanlış şifre!";
+    pin = "";
+    pinDisplay.value = "";
+  }
+}
+
 </script>
 </body>
 </html>
