@@ -1,5 +1,5 @@
 
-    <!doctype html>
+      <!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8"/>
@@ -16,30 +16,18 @@
     margin:0;background:radial-gradient(1200px 800px at 20% -10%,#11223a 0%,#0a0f1a 50%,#060a12 100%);
     color:var(--text);font-family:system-ui,Segoe UI,Roboto,Inter,Arial;overflow-x:hidden
   }
-  .grid-bg{
-    position:fixed;inset:0;pointer-events:none;opacity:.25;
-    background:
-      radial-gradient(800px 400px at 80% 110%, rgba(0,255,255,.08), transparent 60%),
-      repeating-linear-gradient(90deg, rgba(0,255,255,.04) 0 1px, transparent 1px 60px),
-      repeating-linear-gradient(0deg,  rgba(0,255,255,.04) 0 1px, transparent 1px 60px);
-    filter:drop-shadow(0 0 6px rgba(0,255,255,.35))
-  }
   .wrap{max-width:1200px;margin:0 auto;padding:24px}
-
   .hdr{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-  .logo{
-    width:42px;height:42px;border-radius:50%;
-    background:conic-gradient(from 0deg,var(--stroke),transparent 30%,var(--accent));
-    box-shadow:0 0 20px var(--stroke), inset 0 0 10px #000;position:relative
-  }
-  .logo::after{content:"";position:absolute;inset:7px;border-radius:50%;border:2px solid var(--stroke);box-shadow:0 0 18px var(--stroke)}
+  .logo{width:42px;height:42px;border-radius:50%;
+        background:conic-gradient(from 0deg,var(--stroke),transparent 30%,var(--accent));
+        box-shadow:0 0 20px var(--stroke), inset 0 0 10px #000;position:relative}
+  .logo::after{content:"";position:absolute;inset:7px;border-radius:50%;
+        border:2px solid var(--stroke);box-shadow:0 0 18px var(--stroke)}
   .title{font-weight:800;letter-spacing:.12em}
   .sub{color:var(--muted);font-size:13px}
-
   .grid{display:grid;gap:16px;grid-template-columns:1.2fr 1fr .9fr}
   @media (max-width:1100px){ .grid{grid-template-columns:1fr 1fr} }
   @media (max-width:780px){  .grid{grid-template-columns:1fr} }
-
   .card{
     background:var(--panel);border:1px solid rgba(0,255,255,.18);
     border-radius:18px;padding:16px;backdrop-filter: blur(10px) saturate(120%);
@@ -47,57 +35,47 @@
   }
   .card h3{margin:0 0 12px;font-size:15px;font-weight:800;letter-spacing:.14em;color:#bff}
   .muted{color:var(--muted)}
-
-  /* Radar */
-  .radar{
-    --size:360px; width:var(--size); aspect-ratio:1/1; margin:auto;
-    border-radius:50%; position:relative; overflow:hidden;
-    background:
-      radial-gradient(circle at center, transparent 40%, rgba(0,255,255,.06) 41% 100%),
-      conic-gradient(from 0deg, rgba(0,255,255,.15), transparent 40%, rgba(0,255,255,.15) 60%, transparent 100%);
-    border:1px solid rgba(0,255,255,.35);
-    box-shadow:0 0 25px rgba(0,255,255,.35), inset 0 0 35px rgba(0,255,255,.25)
-  }
-  .sweep{position:absolute; inset:0; transform-origin:50% 50%; background:conic-gradient(from 0deg, rgba(0,255,255,.25), transparent 35%); animation:sweep 3.5s linear infinite; mix-blend-mode:screen; filter:blur(2px)}
-  @keyframes sweep{ to{ transform:rotate(360deg) } }
-  .ticks::before,.ticks::after{content:""; position:absolute; inset:0; border-radius:50%; border:1px dashed rgba(0,255,255,.25); box-shadow:inset 0 0 10px rgba(0,255,255,.3)}
-  .ticks::after{ transform:scale(.66) }
-
-  /* Clock */
-  .clock{display:flex;align-items:baseline;gap:10px}
-  .time{font-size:56px;font-weight:900;text-shadow:0 0 20px rgba(0,255,255,.3)}
-  .date{color:#bde;letter-spacing:.04em}
-
-  /* Buttons, chips, gauges */
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .btn{
     position:relative; isolation:isolate;
     background:linear-gradient(180deg,#072934,#03141b);
     border:1px solid rgba(0,255,255,.35); color:var(--text);
-    padding:12px 14px; border-radius:12px; font-weight:700;
+    padding:10px 14px; border-radius:12px; font-weight:700;
     box-shadow:0 6px 18px #0009, inset 0 0 12px rgba(0,255,255,.12);
-    cursor:pointer
+    cursor:pointer; transition:all .25s
   }
-  .btn::after{content:""; position:absolute; inset:-2px; border-radius:14px; border:1px solid rgba(0,255,255,.25); filter:blur(6px); z-index:-1}
-  .btn.small{padding:9px 12px;font-weight:600}
+  .btn:hover{box-shadow:0 0 14px var(--stroke);border-color:var(--stroke)}
+  .btn.small{padding:7px 10px;font-weight:600}
   .chip{border:1px solid rgba(0,255,255,.25);padding:4px 8px;border-radius:20px;color:#bff;font-size:12px}
-
-  .kv{display:grid;grid-template-columns:120px 1fr; gap:6px 12px; font-size:14px}
-  .ok{color:var(--ok)} .danger{color:var(--danger)}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+
+  /* Radar */
+  .radar{--size:360px;width:var(--size);aspect-ratio:1/1;margin:auto;border-radius:50%;position:relative;overflow:hidden;
+    background: radial-gradient(circle at center, transparent 40%, rgba(0,255,255,.06) 41% 100%),
+               conic-gradient(from 0deg, rgba(0,255,255,.15), transparent 40%, rgba(0,255,255,.15) 60%, transparent 100%);
+    border:1px solid rgba(0,255,255,.35); box-shadow:0 0 25px rgba(0,255,255,.35), inset 0 0 35px rgba(0,255,255,.25)}
+  .sweep{position:absolute; inset:0; transform-origin:50% 50%; background:conic-gradient(from 0deg, rgba(0,255,255,.25), transparent 35%); animation:sweep 3.5s linear infinite; mix-blend-mode:screen; filter:blur(2px)}
+  @keyframes sweep{ to{ transform:rotate(360deg) } }
+  .ticks::before,.ticks::after{content:""; position:absolute; inset:0; border-radius:50%; border:1px dashed rgba(0,255,255,.25); box-shadow:inset 0 0 10px rgba(0,255,255,.3)}
+  .ticks::after{ transform:scale(.66) }
+  .clock{display:flex;align-items:baseline;gap:10px}
+  .time{font-size:56px;font-weight:900;text-shadow:0 0 20px rgba(0,255,255,.3)}
+  .date{color:#bde;letter-spacing:.04em}
+
+  /* Gauges */
+  .gauge{display:flex; gap:10px; align-items:center}
+  .bar{height:10px; flex:1; background:#0b2230; border:1px solid rgba(0,255,255,.25); border-radius:20px; overflow:hidden}
+  .fill{height:100%; width:0; background:linear-gradient(90deg,var(--stroke),var(--accent)); box-shadow:0 0 14px var(--stroke); transition:width .5s ease}
+
+  .range{appearance:none;width:100%}
+  .range::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  .range::-webkit-slider-runnable-track{height:12px;border-radius:20px;background:#0b2230;border:1px solid rgba(0,255,255,.25)}
+
   .log{
     background:#06101b;border:1px solid rgba(0,255,255,.25);
     border-radius:12px;padding:10px; height:140px; overflow:auto;
     font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px
   }
-
-  .gauge{display:flex; gap:10px; align-items:center}
-  .bar{height:10px; flex:1; background:#0b2230; border:1px solid rgba(0,255,255,.25); border-radius:20px; overflow:hidden}
-  .fill{height:100%; width:0; background:linear-gradient(90deg,var(--stroke),var(--accent)); box-shadow:0 0 14px var(--stroke)}
-
-  .range{appearance:none;width:100%}
-  .range::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
-  .range::-webkit-slider-runnable-track{height:12px;border-radius:20px;background:#0b2230;border:1px solid rgba(0,255,255,.25)}
 
   /* Modal */
   .modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
@@ -106,16 +84,18 @@
   .modal h4{margin:0 0 10px;letter-spacing:.2em;color:#bff}
   .field{display:flex;gap:10px;align-items:center;margin:10px 0}
   .inp{flex:1;background:#06121e;border:1px solid rgba(0,255,255,.25);border-radius:10px;color:var(--text);padding:10px 12px;font-size:16px}
-  .row-right{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
-  .hint{font-size:12px;color:var(--muted)}
-  video{width:100%;border-radius:12px;border:1px solid rgba(0,255,255,.25);background:#000}
-  .admin-panel{display:none;margin-top:12px}
   .tag{font-size:12px;border:1px solid rgba(0,255,255,.35);border-radius:8px;padding:2px 8px;color:#bff}
+
+  /* Tasks */
+  .task-row{display:flex;align-items:center;gap:8px;background:#06121e;border:1px solid rgba(0,255,255,.2);border-radius:10px;padding:8px 10px;margin:6px 0}
+  .task-title{flex:1}
+  .pill{padding:2px 8px;border-radius:999px;font-size:12px}
+  .due-ok{background:#083; color:#cfffde}
+  .due-soon{background:#5a5200; color:#fff6b3}
+  .due-bad{background:#5a000c; color:#ffd7de}
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
-
 <div class="wrap">
   <div class="hdr">
     <div class="logo"></div>
@@ -137,6 +117,10 @@
         <span class="chip">LAN: <span id="lan">—</span></span>
         <span class="chip">Backend: <span id="backendStat">OFF</span></span>
       </div>
+
+      <div style="height:12px"></div>
+      <h3>EVENT LOG</h3>
+      <div class="log" id="logBox">System online.</div>
     </div>
 
     <!-- MIDDLE -->
@@ -147,13 +131,6 @@
         <button class="btn" onclick="toggleLight('light.mutfak')">Mutfak Işık</button>
         <button class="btn" onclick="setClimate('climate.ev',24)">Klima 24°</button>
         <button class="btn" onclick="setClimate('climate.ev',22)">Klima 22°</button>
-      </div>
-      <div style="height:12px"></div>
-      <div class="row">
-        <button class="btn small" onclick="runScene('scene.film')">🎬 Film Modu</button>
-        <button class="btn small" onclick="runScene('scene.gece')">🌙 Gece Modu</button>
-        <button class="btn small" onclick="runScene('scene.evden_cik')">🚪 Evden Çık</button>
-        <span id="ctrlStatus" class="muted"></span>
       </div>
 
       <div style="height:16px"></div>
@@ -168,8 +145,6 @@
         <div class="bar"><div id="ramFill" class="fill"></div></div>
         <div class="mono" id="ramPct">0%</div>
       </div>
-
-      <!-- STORAGE + BRIGHTNESS -->
       <div class="gauge" style="margin-top:8px">
         <div class="muted" style="width:80px">STORAGE</div>
         <div class="bar"><div id="stoFill" class="fill"></div></div>
@@ -181,19 +156,29 @@
         <div class="row"><span id="brightLbl" class="mono">70%</span></div>
       </div>
 
-      <!-- YÖNETİCİ -->
-      <div style="margin-top:16px" class="row">
+      <!-- Yönetici -->
+      <div style="margin-top:14px" class="row">
         <button class="btn" onclick="openAdmin()">👤 Yönetici</button>
-        <span class="hint">Yönetici işlemleri için PIN veya yüz tanıma (DEMO)</span>
+        <span class="muted">PIN veya yüz tanıma (DEMO)</span>
       </div>
 
-      <!-- ADMIN PANEL (giriş sonrası görünür) -->
+      <!-- ✅ GÖREV PLANLAYICI -->
+      <div style="height:16px"></div>
+      <h3>TASKS • PLANNER</h3>
+      <div class="row">
+        <input id="taskTitle" class="inp" placeholder="Görev başlığı (ör. İlacı al)"/>
+        <input id="taskWhen" class="inp" type="datetime-local"/>
+        <button class="btn small" onclick="addTask()">Ekle</button>
+      </div>
+      <div id="taskList"></div>
+
+      <!-- Admin sonrası görünecek alan -->
       <div id="adminPanel" class="admin-panel">
-        <div class="row" style="margin-top:10px">
+        <div class="row" style="margin-top:12px">
           <span class="tag">ADMIN MODE</span>
-          <button class="btn small" onclick="location.reload()">Paneli Yenile</button>
-          <button class="btn small" onclick="kioskToggle()">Kiosk Kilidi</button>
+          <button class="btn small" onclick="exportTasks()">Görevleri İndir (.txt)</button>
           <button class="btn small" onclick="probeBackend()">Backend’i Dene</button>
+          <button class="btn small" onclick="location.reload()">Paneli Yenile</button>
         </div>
         <div class="muted" id="adminMsg" style="margin-top:8px"></div>
       </div>
@@ -207,34 +192,28 @@
         <button class="btn" onclick="speak('Komut alındı. İşlem uygulanıyor.')">🔊 TTS Test</button>
       </div>
       <div class="muted" id="recStatus" style="margin:8px 2px 0">Hazır</div>
-      <div class="log" id="sttOut" style="margin-top:10px">Transcript burada görünecek…</div>
 
       <div style="height:12px"></div>
       <h3>WEATHER</h3>
-      <div class="kv">
-        <div class="muted">Konum</div><div id="wCity">—</div>
-        <div class="muted">Sıcaklık</div><div id="wTemp">—</div>
-        <div class="muted">Durum</div><div id="wDesc">—</div>
-      </div>
+      <div class="row"><span class="muted">Konum:</span><span id="wCity">—</span></div>
+      <div class="row"><span class="muted">Sıcaklık:</span><span id="wTemp">—</span></div>
+      <div class="row"><span class="muted">Durum:</span><span id="wDesc">—</span></div>
 
       <div style="height:12px"></div>
-      <h3>EVENT LOG</h3>
-      <div class="log" id="logBox">System online.</div>
+      <h3>LOG</h3>
+      <div class="log" id="sttOut">Transcript burada görünecek…</div>
     </div>
   </div>
 </div>
 
-<!-- ADMIN MODAL (PIN KEYPAD + YÜZ DEMO) -->
+<!-- ADMIN MODAL -->
 <div id="adminModal" class="modal" aria-hidden="true">
   <div class="box">
     <h4>YÖNETİCİ DOĞRULAMA</h4>
-
     <!-- PIN ekranı -->
     <div class="field" style="justify-content:center">
-      <input id="pinDisplay" type="password" class="inp"
-             style="text-align:center;font-size:22px;letter-spacing:6px" disabled>
+      <input id="pinDisplay" type="password" class="inp" style="text-align:center;font-size:22px;letter-spacing:6px" disabled>
     </div>
-
     <!-- Rakam tuş takımı -->
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0">
       <button class="btn" onclick="pressNum('1')">1</button>
@@ -250,17 +229,14 @@
       <button class="btn" onclick="pressNum('0')">0</button>
       <button class="btn" onclick="checkPin()">OK</button>
     </div>
-
     <div class="row" style="justify-content:center;margin-top:8px">
       <button class="btn small" onclick="faceDemo()">🧿 Yüz ile dene (DEMO)</button>
       <button class="btn small" onclick="closeAdmin()">Kapat</button>
     </div>
     <div id="adminError" class="danger" style="margin-top:8px"></div>
-
-    <!-- Kamera alanı (demo) -->
     <div id="faceArea" style="margin-top:10px;display:none">
       <video id="cam" playsinline muted></video>
-      <div class="hint">Demo: Kamera 2–3 sn açık kalınca “yüz doğrulandı” sayar.</div>
+      <div class="muted" style="font-size:12px">Demo: Kamera 2–3 sn açık kalınca “yüz doğrulandı” sayar.</div>
     </div>
   </div>
 </div>
@@ -270,7 +246,7 @@
 const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
 function log(msg){
   const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  logBox.textContent+=`\n[${t}] ${msg}`; logBox.scrollTop=logBox.scrollHeight;
+  logBox.textContent+=`\\n[${t}] ${msg}`; logBox.scrollTop=logBox.scrollHeight;
 }
 
 /* ===== Clock/Uptime ===== */
@@ -294,130 +270,111 @@ setInterval(()=>{
 },1500);
 
 /* ===== Backend URL (TODO) ===== */
-const API_BASE='https://YOUR-BACKEND-URL'; // Home Assistant/Node.js URL'in
+const API_BASE='https://YOUR-BACKEND-URL';
 
 /* ===== Commands ===== */
-async function toggleLight(entity_id){
-  ctrlStatus.textContent='Işık komutu…';
-  try{
-    // await fetch(`${API_BASE}/api/light/toggle`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id})});
-    await sleep(600);
-    ctrlStatus.textContent='OK'; log('Light toggled: '+entity_id); speakSoft('Işık komutu uygulandı.');
-  }catch(e){ ctrlStatus.textContent='Hata'; log('ERR light: '+e.message) }
-}
-async function setClimate(entity_id,temperature){
-  ctrlStatus.textContent='Klima…';
-  try{
-    // await fetch(`${API_BASE}/api/climate/set`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id,temperature})});
-    await sleep(700);
-    ctrlStatus.textContent='OK'; log(`Climate set → ${temperature}°`); speakSoft(`Klima ${temperature} dereceye ayarlandı.`);
-  }catch(e){ ctrlStatus.textContent='Hata'; log('ERR climate: '+e.message) }
-}
-async function runScene(entity_id){
-  ctrlStatus.textContent='Sahne…';
-  try{
-    // await fetch(`${API_BASE}/api/scene/apply`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id})});
-    await sleep(700);
-    ctrlStatus.textContent='OK'; log('Scene applied: '+entity_id);
-  }catch(e){ ctrlStatus.textContent='Hata'; log('ERR scene: '+e.message) }
-}
+async function toggleLight(entity_id){ctrlStatus.textContent='Işık komutu…';try{await sleep(600);ctrlStatus.textContent='OK';log('Light toggled: '+entity_id)}catch(e){ctrlStatus.textContent='Hata';log('ERR light: '+e.message)}}
+async function setClimate(entity_id,temperature){ctrlStatus.textContent='Klima…';try{await sleep(700);ctrlStatus.textContent='OK';log(`Climate set → ${temperature}°`)}catch(e){ctrlStatus.textContent='Hata';log('ERR climate: '+e.message)}}
 
 /* ===== Brightness ===== */
 function onBrightInput(v){ brightLbl.textContent=v+'%'; }
-async function applyBrightness(v){
-  log('Brightness → '+v+'%');
-  try{
-    // await fetch(`${API_BASE}/api/brightness/set`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({value:Number(v)})});
-    await sleep(400);
-    speakSoft('Parlaklık uygulandı.');
-  }catch(e){ log('ERR brightness: '+e.message) }
-}
+async function applyBrightness(v){ log('Brightness → '+v+'%'); await sleep(400); }
 
-/* ===== TTS ===== */
-function speak(t){ try{ const u=new SpeechSynthesisUtterance(t); u.lang='tr-TR'; speechSynthesis.speak(u); }catch(e){ log('TTS yok: '+e.message) } }
-function speakSoft(t){ if(!speechSynthesis.speaking) speak(t); }
-
-/* ===== MIC / STT (demo) ===== */
-/* Not: HTTPS zorunlu. Gerçek STT için backend'e blob gönder:
-   const fd=new FormData(); fd.append('audio', blob, 'rec.webm');
-   const r=await fetch(`${API_BASE}/stt`, { method:'POST', body:fd });
-   const { text } = await r.json();
-*/
-let media, rec, chunks=[];
-async function record(){
-  try{
-    recStatus.textContent='Mikrofon açılıyor…';
-    media = await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks=[]; rec=new MediaRecorder(media);
-    rec.ondataavailable=e=>chunks.push(e.data);
-    rec.onstop=async ()=>{
-      const blob=new Blob(chunks,{type:'audio/webm'}); recStatus.textContent='Yükleniyor…';
-      try{
-        await sleep(900); const text='Salon ışığını aç'; // DEMO
-        sttOut.textContent=text; log('STT: '+text); handleIntent(text); recStatus.textContent='Hazır';
-      }catch(e){ recStatus.textContent='STT hata'; log('ERR stt: '+e.message) }
-      finally{ media.getTracks().forEach(t=>t.stop()) }
-    };
-    rec.start(); recStatus.textContent='Kayıt başladı… Tekrar dokunarak bitir.'; recBtn.onclick=stopRec;
-  }catch(e){ recStatus.textContent='Mic hata'; log('ERR mic: '+e.message) }
-}
-function stopRec(){ rec?.stop(); recBtn.onclick=record; }
-function handleIntent(text){
-  const t=text.toLowerCase();
-  if(t.includes('ışık')) return toggleLight('light.salon');
-  if(t.includes('klima') && t.match(/\d{2}/)){ const x=Number(t.match(/\d{2}/)[0]); return setClimate('climate.ev',x); }
-  if(t.includes('film')) return runScene('scene.film');
-  speakSoft('Tam anlayamadım, tekrar eder misin?');
-}
-
-/* ===== Simple Weather Demo ===== */
-if(navigator.geolocation){
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const {latitude:lat, longitude:lon}=pos.coords;
-    wCity.textContent = lat.toFixed(3)+', '+lon.toFixed(3);
-    // Burayı gerçek API ile değiştir (Open-Meteo/OWM)
-    wTemp.textContent = (22+Math.round(Math.random()*6))+'°C';
-    wDesc.textContent = 'Parçalı bulutlu';
-  }, ()=>{ wCity.textContent='İzin verilmedi'; });
-}else{ wCity.textContent='—' }
+/* ===== TTS & MIC (demo) ===== */
+function speak(t){ try{ const u=new SpeechSynthesisUtterance(t); u.lang='tr-TR'; speechSynthesis.speak(u); }catch{} }
+let media,rec,chunks=[];
+async function record(){ try{ recStatus.textContent='Mikrofon açılıyor…'; media=await navigator.mediaDevices.getUserMedia({audio:true}); chunks=[]; rec=new MediaRecorder(media);
+  rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=async()=>{ const blob=new Blob(chunks,{type:'audio/webm'}); recStatus.textContent='Yükleniyor…'; await sleep(900); const text='Salon ışığını aç'; sttOut.textContent=text; log('STT: '+text); recStatus.textContent='Hazır'; media.getTracks().forEach(t=>t.stop()); };
+  rec.start(); recStatus.textContent='Kayıt başladı… Tekrar dokunarak bitir.'; recBtn.onclick=()=>{rec.stop(); recBtn.onclick=record};
+}catch(e){recStatus.textContent='Mic hata';}}
+/* ===== Weather demo ===== */
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(p=>{const {latitude:lat,longitude:lon}=p.coords;wCity.textContent=lat.toFixed(3)+', '+lon.toFixed(3);wTemp.textContent=(22+Math.round(Math.random()*6))+'°C';wDesc.textContent='Parçalı bulutlu'},()=>{wCity.textContent='İzin verilmedi'})}
 
 /* ===== Admin Auth (PIN + Face DEMO) ===== */
-const MODAL = document.getElementById('adminModal');
-function openAdmin(){ adminError.textContent=''; pin=''; pinDisplay.value=''; faceArea.style.display='none'; stopCam(); MODAL.classList.add('active'); MODAL.setAttribute('aria-hidden','false'); }
-function closeAdmin(){ stopCam(); MODAL.classList.remove('active'); MODAL.setAttribute('aria-hidden','true'); }
-function grantAdmin(){
-  adminPanel.style.display='block';
-  adminMsg.textContent='Yönetici yetkileri aktif edildi.';
-  log('ADMIN: giriş başarılı'); speakSoft('Yönetici yetkileri etkin.');
-}
-
-/* PIN keypad */
-let pin="";
+const MODAL=document.getElementById('adminModal'); let pin="";
+function openAdmin(){adminError.textContent=''; pin=''; pinDisplay.value=''; faceArea.style.display='none'; stopCam(); MODAL.classList.add('active');}
+function closeAdmin(){stopCam(); MODAL.classList.remove('active');}
 function pressNum(n){ if(pin.length<4){ pin+=n; pinDisplay.value=pin; } }
 function clearPin(){ pin=pin.slice(0,-1); pinDisplay.value=pin; }
-function checkPin(){
-  if(pin==="1673"){ grantAdmin(); closeAdmin(); }
-  else{ adminError.textContent="Yanlış şifre!"; pin=""; pinDisplay.value=""; }
-}
-
-/* Face demo */
+function checkPin(){ if(pin==='1673'){ grantAdmin(); closeAdmin(); } else{ adminError.textContent='Yanlış şifre!'; pin=''; pinDisplay.value=''; } }
 let camStream=null, faceTimer=null;
-async function faceDemo(){
-  adminError.textContent=''; faceArea.style.display='block';
-  try{
-    camStream = await navigator.mediaDevices.getUserMedia({video:true});
-    cam.srcObject = camStream; await cam.play();
-    faceTimer = setTimeout(()=>{ grantAdmin(); closeAdmin(); }, 2500); // DEMO: 2.5sn sonra başarı
-  }catch(e){ adminError.textContent='Kamera açılamadı: '+e.message }
+async function faceDemo(){ adminError.textContent=''; faceArea.style.display='block';
+  try{ camStream=await navigator.mediaDevices.getUserMedia({video:true}); cam.srcObject=camStream; await cam.play(); faceTimer=setTimeout(()=>{grantAdmin();closeAdmin()},2500) }catch(e){ adminError.textContent='Kamera açılamadı: '+e.message }
 }
-function stopCam(){
-  if(faceTimer) clearTimeout(faceTimer);
-  if(camStream){ cam.pause?.(); cam.srcObject=null; camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+function stopCam(){ if(faceTimer) clearTimeout(faceTimer); if(camStream){ cam.pause?.(); cam.srcObject=null; camStream.getTracks().forEach(t=>t.stop()); camStream=null; } }
+function grantAdmin(){ adminPanel.style.display='block'; adminMsg.textContent='Yönetici yetkileri aktif edildi.'; log('ADMIN: giriş başarılı'); }
+
+/* ===== TASKS (Planner) ===== */
+const TASK_KEY='maylo_tasks_v1';
+let tasks = JSON.parse(localStorage.getItem(TASK_KEY) || '[]'); // {id,title,whenISO,done}
+
+function addTask(){
+  const title = taskTitle.value.trim();
+  const when  = taskWhen.value; // YYYY-MM-DDTHH:mm
+  if(!title || !when){ alert('Başlık ve tarih/saat gerekli.'); return; }
+  tasks.push({ id:crypto.randomUUID?.()||String(Date.now()+Math.random()), title, whenISO:new Date(when).toISOString(), done:false });
+  saveTasks(); taskTitle.value=''; taskWhen.value=''; renderTasks(); log('Task eklendi: '+title);
 }
 
-/* Admin actions (örnek) */
-function kioskToggle(){ log('Kiosk kilidi (demo)'); /* TODO: backend ile gerçek kilit */ }
-async function probeBackend(){ log('Backend probesi…'); try{ /*await fetch(`${API_BASE}/health`)*/ await sleep(500); backendStat.textContent='ON'; log('Backend cevap verdi.'); }catch{ backendStat.textContent='OFF'; } }
+function delTask(id){
+  tasks = tasks.filter(t=>t.id!==id);
+  saveTasks(); renderTasks(); log('Task silindi: '+id);
+}
+function toggleDone(id){
+  const t = tasks.find(x=>x.id===id); if(!t) return;
+  t.done = !t.done; saveTasks(); renderTasks();
+}
+
+function saveTasks(){ localStorage.setItem(TASK_KEY, JSON.stringify(tasks)); }
+
+function statusPill(t){
+  if(t.done) return '<span class="pill due-ok">Tamamlandı</span>';
+  const now = Date.now();
+  const due = Date.parse(t.whenISO);
+  const diff = due - now;
+  if(diff < 0) return '<span class="pill due-bad">Gecikti</span>';
+  if(diff <= 60*60*1000) return '<span class="pill due-soon">1 saat içinde</span>'; // 1 saat
+  return '<span class="pill" style="background:#0a2d3a;color:#bff">Planlı</span>';
+}
+
+function renderTasks(){
+  // en yakın tarih en üstte
+  tasks.sort((a,b)=> Date.parse(a.whenISO)-Date.parse(b.whenISO));
+  taskList.innerHTML='';
+  for(const t of tasks){
+    const row=document.createElement('div'); row.className='task-row';
+    const whenLocal = new Date(t.whenISO).toLocaleString('tr-TR');
+    row.innerHTML = `
+      <span class="task-title">${t.title} <span class="muted">— ${whenLocal}</span></span>
+      ${statusPill(t)}
+      <button class="btn small" onclick="toggleDone('${t.id}')">${t.done?'Geri Al':'Tamamla'}</button>
+      <button class="btn small" onclick="delTask('${t.id}')">Sil</button>
+    `;
+    taskList.appendChild(row);
+  }
+}
+// periyodik durum güncelle
+setInterval(()=>renderTasks(), 60*1000);
+
+/* Export (.txt) — Admin panelde */
+function exportTasks(){
+  const lines = tasks.map(t=>{
+    const status = t.done ? 'DONE' : (Date.parse(t.whenISO)<Date.now() ? 'OVERDUE' : 'PENDING');
+    return `${new Date(t.whenISO).toLocaleString('tr-TR')} | [${status}] ${t.title}`;
+  });
+  const blob = new Blob([lines.join('\n')||'Görev yok.'], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'maylo_tasks.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* İlk render */
+renderTasks();
+
+/* Admin örnek */
+async function probeBackend(){ log('Backend probesi…'); try{ await sleep(500); backendStat.textContent='ON'; log('Backend cevap verdi.')}catch{ backendStat.textContent='OFF'; } }
 </script>
 </body>
 </html>
