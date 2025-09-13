@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jarvis Panel</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --accent:#ffd200; --fg:#e5e7eb; }
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Roboto,Arial}
+    .wrap{max-width:900px;margin:0 auto;padding:24px}
+    .grid{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+    .card{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 6px 20px #00000066}
+    .title{font-weight:700;font-size:20px;margin:0 0 12px}
+    .big{font-size:42px;font-weight:800}
+    button{background:var(--accent);border:0;border-radius:12px;padding:14px 18px;font-weight:700}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .status{font-size:14px;opacity:.8}
+    .mic{font-size:18px}
+    .log{white-space:pre-wrap;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0b1220;border-radius:12px;padding:12px;max-height:180px;overflow:auto}
+    @media (max-width:720px){ .grid{grid-template-columns:1fr} .big{font-size:34px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid">
+      <div class="card">
+        <div class="title">Saat & Tarih</div>
+        <div id="clock" class="big">--:--</div>
+        <div id="date" class="status">—</div>
+      </div>
+
+      <div class="card">
+        <div class="title">Hızlı Kontrol</div>
+        <div class="row">
+          <button onclick="toggleLight('light.salon')">Salon Işık</button>
+          <button onclick="setTemp('climate.ev', 24)">Klima 24°</button>
+          <span id="ctrlStatus" class="status"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title">Sesli Komut</div>
+        <div class="row">
+          <button class="mic" id="recBtn" onclick="record()">🎤 Bas-Konuş</button>
+          <span id="recStatus" class="status"></span>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button onclick="speak('Salon ışığı açıldı')">🔊 Test: TTS</button>
+        </div>
+        <div id="sttOut" class="log" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card">
+        <div class="title">Notlar</div>
+        <div class="log" id="logBox">Hazır.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ==== Saat ====
+function tick(){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  clock.textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  date.textContent=d.toLocaleDateString('tr-TR',{weekday:'long', day:'2-digit', month:'long', year:'numeric'});
+}
+setInterval(tick,1000); tick();
+
+// ==== Backend örnekleri (adresini kendine göre değiştir) ====
+const API_BASE = 'https://ornek-backend-adresin.com';
+
+async function toggleLight(entity){
+  ctrlStatus.textContent='Işık komutu gönderiliyor...';
+  await new Promise(r=>setTimeout(r,700));
+  ctrlStatus.textContent='Salon ışık: KOMUT GÖNDERİLDİ';
+  log('Işık toggle gönderildi.');
+}
+
+async function setTemp(entity,temp){
+  ctrlStatus.textContent='Klima ayarlanıyor...';
+  await new Promise(r=>setTimeout(r,700));
+  ctrlStatus.textContent=`Klima ${temp}°: KOMUT GÖNDERİLDİ`;
+  log('Klima komutu gönderildi.');
+}
+
+// ==== TTS ====
+function speak(text){
+  try{
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='tr-TR';
+    speechSynthesis.speak(u);
+  }catch(e){ log('TTS desteklenmiyor: '+e.message) }
+}
+
+// ==== Sesli Kayıt ====
+let media,rec,chunks=[];
+async function record(){
+  try{
+    recStatus.textContent='Mikrofon açılıyor...';
+    media = await navigator.mediaDevices.getUserMedia({audio:true});
+    chunks=[];
+    rec = new MediaRecorder(media);
+    rec.ondataavailable=e=>chunks.push(e.data);
+    rec.onstop=async ()=>{
+      const blob = new Blob(chunks,{type:'audio/webm'});
+      recStatus.textContent='Yükleniyor...';
+      await new Promise(r=>setTimeout(r,1000));
+      const text = 'Salon ışığını aç'; // DEMO
+      recStatus.textContent='Hazır';
+      sttOut.textContent = 'STT → ' + text;
+      log('STT çıktı: '+text);
+      if(text.toLowerCase().includes('ışık')) toggleLight('light.salon');
+    };
+    rec.start();
+    recStatus.textContent='Kayıt başladı, bırakmak için tekrar dokun.';
+    recBtn.onclick = stopRec;
+  }catch(e){
+    recStatus.textContent='Mikrofon hatası';
+    log('Mic error: '+e.message);
+  }
+}
+function stopRec(){
+  rec?.stop();
+  media?.getTracks().forEach(t=>t.stop());
+  recBtn.onclick = record;
+  recStatus.textContent='Kayıt durdu, çözümleme yapılıyor...';
+}
+
+// ==== Log ====
+function log(msg){
+  const t = new Date().toLocaleTimeString('tr-TR');
+  logBox.textContent += `\n[${t}] ${msg}`;
+}
+</script>
+</body>
+</html>
