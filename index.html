@@ -204,6 +204,17 @@
       <div class="log" id="sttOut">Transcript burada görünecek…</div>
     </div>
   </div>
+      <!-- VISION (kamera analizi) -->
+<div class="card">
+  <h3>VISION</h3>
+  <div class="row">
+    <button class="btn" onclick="startVision()">📷 Kamerayı Başlat</button>
+    <button class="btn" onclick="stopVision()">⏹ Durdur</button>
+  </div>
+  <video id="vCam" autoplay playsinline muted style="width:100%;border-radius:10px;margin-top:8px"></video>
+  <canvas id="vCanvas" style="width:100%;border-radius:10px;margin-top:8px"></canvas>
+  <div class="muted" id="visionStat" style="margin-top:6px">Hazır</div>
+</div>
 </div>
 
 <!-- ADMIN MODAL -->
@@ -376,5 +387,102 @@ renderTasks();
 /* Admin örnek */
 async function probeBackend(){ log('Backend probesi…'); try{ await sleep(500); backendStat.textContent='ON'; log('Backend cevap verdi.')}catch{ backendStat.textContent='OFF'; } }
 </script>
+      <!-- TFJS + COCO-SSD (yerel, hızlı, yorum için ideal) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
+<script>
+let vStream=null, vModel=null, vRunning=false, vCtx=null, vVideo=null, vCanvas=null;
+let lastSpokenAt=0, lastPersonArea=null, speakCooldown=2500; // ms
+
+async function startVision(){
+  try{
+    visionStat.textContent='Model yükleniyor…';
+    if(!vModel) vModel = await cocoSsd.load();            // kişi/kedi/köpek/telefon vb.
+    visionStat.textContent='Kamera açılıyor…';
+    vVideo = document.getElementById('vCam');
+    vCanvas= document.getElementById('vCanvas');
+    vStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});
+    vVideo.srcObject = vStream; await vVideo.play();
+    vCanvas.width = vVideo.videoWidth; vCanvas.height = vVideo.videoHeight;
+    vCtx = vCanvas.getContext('2d');
+    vRunning = true; visionStat.textContent='Çalışıyor…';
+    detectLoop();
+  }catch(e){ visionStat.textContent='Hata: '+e.message; }
+}
+
+function stopVision(){
+  vRunning=false;
+  try{ vStream?.getTracks().forEach(t=>t.stop()); }catch{}
+  vStream=null; visionStat.textContent='Durduruldu';
+}
+
+async function detectLoop(){
+  if(!vRunning) return;
+  try{
+    const preds = await vModel.detect(vVideo); // [{class,score,bbox:[x,y,w,h]}]
+    // görüntüyü çiz
+    vCtx.drawImage(vVideo,0,0,vCanvas.width,vCanvas.height);
+    // kutular
+    const good = preds.filter(p=>p.score>=0.55);
+    for(const p of good){
+      const [x,y,w,h]=p.bbox;
+      vCtx.strokeStyle='cyan'; vCtx.lineWidth=2; vCtx.strokeRect(x,y,w,h);
+      vCtx.fillStyle='rgba(0,255,255,.15)'; vCtx.fillRect(x,y-18,(p.class.length*8)+60,18);
+      vCtx.fillStyle='#002'; vCtx.font='12px ui-monospace';
+      vCtx.fillText(`${p.class} ${(p.score*100|0)}%`, x+6, y-6);
+    }
+
+    // ----- Basit yorum kuralları -----
+    const people = good.filter(p=>p.class==='person');
+    const cats   = good.filter(p=>p.class==='cat');
+    const dogs   = good.filter(p=>p.class==='dog');
+
+    // 1) Kişi sayısı ve yaklaşma/uzaklaşma
+    if(people.length>0){
+      const p0=people[0];
+      const area = p0.bbox[2]*p0.bbox[3];
+      let trend='';
+      if(lastPersonArea!=null){
+        const delta = area-lastPersonArea;
+        if(delta>6000) trend='yaklaşıyor';
+        else if(delta<-6000) trend='uzaklaşıyor';
+      }
+      lastPersonArea=area;
+
+      // nadir konuş (cooldown)
+      if(Date.now()-lastSpokenAt>speakingGap(trend)){
+        const msg = people.length===1
+          ? (trend ? `Bir kişi ${trend}.` : `Bir kişi algılandı.`)
+          : `${people.length} kişi algılandı.`;
+        speakSoft?.(msg); lastSpokenAt=Date.now();
+      }
+      visionStat.textContent= people.length===1 ? 'Kişi algılandı' : `${people.length} kişi algılandı`;
+    } else {
+      visionStat.textContent='Kişi yok';
+      lastPersonArea=null;
+    }
+
+    // 2) Evcil hayvanlar
+    if((cats.length||dogs.length) && Date.now()-lastSpokenAt>2500){
+      const parts=[];
+      if(cats.length) parts.push(`${cats.length} kedi`);
+      if(dogs.length) parts.push(`${dogs.length} köpek`);
+      speakSoft?.(`Görüntüde ${parts.join(' ve ')} var.`);
+      lastSpokenAt=Date.now();
+    }
+
+    // 3) Belirli nesneler (telefon, laptop, cup vs.) -> örnek tetik
+    const phone = good.find(p=>p.class==='cell phone');
+    if(phone && Date.now()-lastSpokenAt>3000){
+      speakSoft?.('Telefon görünüyor.');
+      lastSpokenAt=Date.now();
+    }
+
+  }catch(e){ visionStat.textContent='Model hata: '+e.message; }
+  requestAnimationFrame(detectLoop);
+}
+
+function speakingGap(trend){ return trend ? 1400 : 2200; }
+            </script>
 </body>
 </html>
