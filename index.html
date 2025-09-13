@@ -1,4 +1,4 @@
-        <!doctype html>
+ <!doctype html>
 <html lang="tr">
 <head>
 <meta charset="utf-8"/>
@@ -53,6 +53,18 @@
   .range{appearance:none;width:100%}
   .range::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
   .range::-webkit-slider-runnable-track{height:12px;border-radius:20px;background:#0b2230;border:1px solid rgba(0,255,255,.25)}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+  .modal .box{background:var(--panel);border:1px solid rgba(0,255,255,.35);border-radius:18px;max-width:520px;width:100%;padding:18px;box-shadow:0 20px 60px #000d}
+  .modal h4{margin:0 0 10px;letter-spacing:.2em;color:#bff}
+  .field{display:flex;gap:10px;align-items:center;margin:10px 0}
+  .inp{flex:1;background:#06121e;border:1px solid rgba(0,255,255,.25);border-radius:10px;color:var(--text);padding:10px 12px;font-size:16px}
+  .row-right{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+  .hint{font-size:12px;color:var(--muted)}
+  video{width:100%;border-radius:12px;border:1px solid rgba(0,255,255,.25);background:#000}
+  .admin-panel{display:none;margin-top:12px}
+  .tag{font-size:12px;border:1px solid rgba(0,255,255,.35);border-radius:8px;padding:2px 8px;color:#bff}
 </style>
 </head>
 <body>
@@ -111,7 +123,7 @@
         <div class="mono" id="ramPct">0%</div>
       </div>
 
-      <!-- 💥 YENİ: STORAGE + BRIGHTNESS -->
+      <!-- STORAGE + BRIGHTNESS -->
       <div class="gauge" style="margin-top:8px">
         <div class="muted" style="width:80px">STORAGE</div>
         <div class="bar"><div id="stoFill" class="fill"></div></div>
@@ -121,6 +133,23 @@
         <div class="muted" style="margin-bottom:6px">BRIGHTNESS</div>
         <input id="bright" type="range" min="10" max="100" value="70" class="range" oninput="onBrightInput(this.value)" onchange="applyBrightness(this.value)"/>
         <div class="row"><span id="brightLbl" class="mono">70%</span></div>
+      </div>
+
+      <!-- YÖNETİCİ BUTONU -->
+      <div style="margin-top:16px" class="row">
+        <button class="btn" onclick="openAdmin()">👤 Yönetici</button>
+        <span class="hint">Yönetici işlemleri için şifre veya yüz tanıma (DEMO)</span>
+      </div>
+
+      <!-- ADMIN PANEL (giriş sonrası görünür) -->
+      <div id="adminPanel" class="admin-panel">
+        <div class="row" style="margin-top:10px">
+          <span class="tag">ADMIN MODE</span>
+          <button class="btn small" onclick="location.reload()">Paneli Yenile</button>
+          <button class="btn small" onclick="kioskToggle()">Kiosk Kilidi</button>
+          <button class="btn small" onclick="probeBackend()">Backend’i Dene</button>
+        </div>
+        <div class="muted" id="adminMsg" style="margin-top:8px"></div>
       </div>
     </div>
 
@@ -149,84 +178,103 @@
   </div>
 </div>
 
+<!-- ADMIN MODAL -->
+<div id="adminModal" class="modal" aria-hidden="true">
+  <div class="box">
+    <h4>YÖNETİCİ DOĞRULAMA</h4>
+    <div class="field">
+      <input id="adminPass" type="password" class="inp" placeholder="Şifre" inputmode="numeric" autocomplete="off"/>
+      <button class="btn" onclick="checkPass()">Giriş</button>
+    </div>
+    <div class="hint">Şifre: <code class="mono">1673</code> (demo)</div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn" onclick="faceDemo()">🧿 Yüz ile dene (DEMO)</button>
+      <button class="btn small" onclick="closeAdmin()">Kapat</button>
+    </div>
+    <div id="faceArea" style="margin-top:10px;display:none">
+      <video id="cam" playsinline muted></video>
+      <div class="hint">Demo: Kamera 2–3 sn açık kalınca “yüz doğrulandı” sayar.</div>
+    </div>
+    <div id="adminError" class="danger" style="margin-top:8px"></div>
+  </div>
+</div>
+
 <script>
-const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
 function log(msg){const t=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});logBox.textContent+=`\n[${t}] ${msg}`;logBox.scrollTop=logBox.scrollHeight}
 
 /* Clock */
 (function tick(){const d=new Date();const p=n=>String(n).padStart(2,'0');time.textContent=`${p(d.getHours())}:${p(d.getMinutes())}`;date.textContent=d.toLocaleDateString('tr-TR',{weekday:'long', day:'2-digit', month:'long'});uptime.textContent=(performance.now()/1000/60).toFixed(0)+' dk';requestAnimationFrame(tick)})();
-lan.textContent = location.hostname || 'localhost';
+lan.textContent=location.hostname||'localhost';
 
 /* Fake gauges (backend bağlayınca kaldır) */
-setInterval(()=>{
-  const cpu=22+Math.round(Math.random()*35), ram=30+Math.round(Math.random()*25), sto=40+Math.round(Math.random()*40);
-  cpuFill.style.width=cpu+'%'; cpuPct.textContent=cpu+'%';
-  ramFill.style.width=ram+'%'; ramPct.textContent=ram+'%';
-  stoFill.style.width=sto+'%'; stoPct.textContent=sto+'%';
+setInterval(()=>{const cpu=22+Math.round(Math.random()*35),ram=30+Math.round(Math.random()*25),sto=40+Math.round(Math.random()*40);
+  cpuFill.style.width=cpu+'%';cpuPct.textContent=cpu+'%';
+  ramFill.style.width=ram+'%';ramPct.textContent=ram+'%';
+  stoFill.style.width=sto+'%';stoPct.textContent=sto+'%';
 },1500);
 
 /* BACKEND URL */
-const API_BASE = 'https://YOUR-BACKEND-URL'; // TODO
+const API_BASE='https://YOUR-BACKEND-URL'; // TODO
 
 /* Commands */
 async function toggleLight(entity_id){ctrlStatus.textContent='Işık komutu…';try{/*await fetch(`${API_BASE}/api/light/toggle`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id})})*/await sleep(600);ctrlStatus.textContent='OK';log('Light toggled: '+entity_id);speakSoft('Işık komutu uygulandı.')}catch(e){ctrlStatus.textContent='Hata';log('ERR light: '+e.message)}}
 async function setClimate(entity_id,temperature){ctrlStatus.textContent='Klima…';try{/*await fetch(`${API_BASE}/api/climate/set`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id,temperature})})*/await sleep(700);ctrlStatus.textContent='OK';log(`Climate set → ${temperature}°`);speakSoft(`Klima ${temperature} dereceye ayarlandı.`)}catch(e){ctrlStatus.textContent='Hata';log('ERR climate: '+e.message)}}
 async function runScene(entity_id){ctrlStatus.textContent='Sahne…';try{/*await fetch(`${API_BASE}/api/scene/apply`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity_id})})*/await sleep(700);ctrlStatus.textContent='OK';log('Scene applied: '+entity_id)}catch(e){ctrlStatus.textContent='Hata';log('ERR scene: '+e.message)}}
 
-/* NEW: Brightness */
+/* Brightness */
 function onBrightInput(v){brightLbl.textContent=v+'%'}
-async function applyBrightness(v){
-  log('Brightness → '+v+'%');
-  try{
-    // await fetch(`${API_BASE}/api/brightness/set`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({value:Number(v)})});
-    await sleep(400);
-    speakSoft('Parlaklık uygulandı.');
-  }catch(e){log('ERR brightness: '+e.message)}
-}
+async function applyBrightness(v){log('Brightness → '+v+'%');try{/*await fetch(`${API_BASE}/api/brightness/set`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({value:Number(v)})})*/await sleep(400);speakSoft('Parlaklık uygulandı.')}catch(e){log('ERR brightness: '+e.message)}}
 
 /* TTS */
-function speak(text){try{const u=new SpeechSynthesisUtterance(text);u.lang='tr-TR';speechSynthesis.speak(u)}catch(e){log('TTS yok: '+e.message)}}
-function speakSoft(t){ if(!speechSynthesis.speaking) speak(t) }
+function speak(t){try{const u=new SpeechSynthesisUtterance(t);u.lang='tr-TR';speechSynthesis.speak(u)}catch(e){log('TTS yok: '+e.message)}}
+function speakSoft(t){if(!speechSynthesis.speaking) speak(t)}
 
 /* MIC / STT (demo) */
 let media,rec,chunks=[];
-async function record(){
-  try{
-    recStatus.textContent='Mikrofon açılıyor…';
-    media = await navigator.mediaDevices.getUserMedia({audio:true});
-    chunks=[]; rec=new MediaRecorder(media);
-    rec.ondataavailable=e=>chunks.push(e.data);
-    rec.onstop=async ()=>{
-      const blob=new Blob(chunks,{type:'audio/webm'}); recStatus.textContent='Yükleniyor…';
-      try{
-        // const fd=new FormData(); fd.append('audio',blob,'rec.webm');
-        // const r=await fetch(`${API_BASE}/stt`,{method:'POST',body:fd}); const {text}=await r.json();
-        await sleep(900); const text='Salon ışığını aç'; // demo
-        sttOut.textContent=text; log('STT: '+text); handleIntent(text); recStatus.textContent='Hazır';
-      }catch(e){recStatus.textContent='STT hata';log('ERR stt: '+e.message)}
-      finally{media.getTracks().forEach(t=>t.stop())}
-    };
-    rec.start(); recStatus.textContent='Kayıt başladı… Tekrar dokunarak bitir.'; recBtn.onclick=stopRec;
-  }catch(e){recStatus.textContent='Mic hata';log('ERR mic: '+e.message)}
-}
-function stopRec(){rec?.stop(); recBtn.onclick=record}
-function handleIntent(text){
-  const t=text.toLowerCase();
-  if(t.includes('ışık')) return toggleLight('light.salon');
-  if(t.includes('klima') && t.match(/\d{2}/)){const x=Number(t.match(/\d{2}/)[0]);return setClimate('climate.ev',x)}
-  if(t.includes('film')) return runScene('scene.film');
-  speakSoft('Tam anlayamadım, tekrar eder misin?');
-}
+async function record(){try{recStatus.textContent='Mikrofon açılıyor…';media=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];rec=new MediaRecorder(media);
+  rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=async ()=>{const blob=new Blob(chunks,{type:'audio/webm'});recStatus.textContent='Yükleniyor…';try{
+    // const fd=new FormData();fd.append('audio',blob,'rec.webm');const r=await fetch(`${API_BASE}/stt`,{method:'POST',body:fd});const {text}=await r.json();
+    await sleep(900);const text='Salon ışığını aç'; // demo
+    sttOut.textContent=text;log('STT: '+text);handleIntent(text);recStatus.textContent='Hazır';
+  }catch(e){recStatus.textContent='STT hata';log('ERR stt: '+e.message)}finally{media.getTracks().forEach(t=>t.stop())}};
+  rec.start();recStatus.textContent='Kayıt başladı… Tekrar dokunarak bitir.';recBtn.onclick=stopRec;
+}catch(e){recStatus.textContent='Mic hata';log('ERR mic: '+e.message)}}
+function stopRec(){rec?.stop();recBtn.onclick=record}
+function handleIntent(t){t=t.toLowerCase();if(t.includes('ışık'))return toggleLight('light.salon');if(t.includes('klima')&&t.match(/\d{2}/)){const x=Number(t.match(/\d{2}/)[0]);return setClimate('climate.ev',x)}if(t.includes('film'))return runScene('scene.film');speakSoft('Tam anlayamadım, tekrar eder misin?')}
 
-/* Weather demo */
-if(navigator.geolocation){
-  navigator.geolocation.getCurrentPosition(async pos=>{
-    const {latitude:lat,longitude:lon}=pos.coords;
-    wCity.textContent=lat.toFixed(3)+', '+lon.toFixed(3);
-    wTemp.textContent=(22+Math.round(Math.random()*6))+'°C';
-    wDesc.textContent='Parçalı bulutlu';
-  },()=>{wCity.textContent='İzin verilmedi'});
-}else{wCity.textContent='—'}
+/* WEATHER demo */
+if(navigator.geolocation){navigator.geolocation.getCurrentPosition(async p=>{const {latitude:lat,longitude:lon}=p.coords;wCity.textContent=lat.toFixed(3)+', '+lon.toFixed(3);wTemp.textContent=(22+Math.round(Math.random()*6))+'°C';wDesc.textContent='Parçalı bulutlu'},()=>{wCity.textContent='İzin verilmedi'})}else{wCity.textContent='—'}
+
+/* ===== ADMIN AUTH ===== */
+const MODAL = document.getElementById('adminModal');
+function openAdmin(){adminError.textContent='';adminPass.value='';MODAL.style.display='flex';MODAL.setAttribute('aria-hidden','false')}
+function closeAdmin(){stopCam();MODAL.style.display='none';MODAL.setAttribute('aria-hidden','true')}
+function checkPass(){
+  if(adminPass.value==='1673'){grantAdmin();closeAdmin();return}
+  adminError.textContent='Hatalı şifre';
+}
+let camStream=null, faceTimer=null;
+async function faceDemo(){
+  adminError.textContent=''; faceArea.style.display='block';
+  try{
+    camStream = await navigator.mediaDevices.getUserMedia({video:true});
+    cam.srcObject = camStream; cam.play();
+    faceTimer = setTimeout(()=>{ grantAdmin(); closeAdmin(); }, 2500); // DEMO: 2.5 sn sonra başarılı say
+  }catch(e){ adminError.textContent='Kamera açılamadı: '+e.message }
+}
+function stopCam(){ if(faceTimer) clearTimeout(faceTimer); if(camStream){ cam.pause?.(); cam.srcObject=null; camStream.getTracks().forEach(t=>t.stop()); camStream=null } }
+function grantAdmin(){
+  adminPanel.style.display='block';
+  adminMsg.textContent='Yönetici yetkileri aktif edildi.';
+  log('ADMIN: giriş başarılı');
+  speakSoft('Yönetici yetkileri etkin.');
+}
+/* Admin actions (örnek) */
+function kioskToggle(){log('Kiosk kilidi (demo)');/* TODO: backend ile gerçek kilit */}
+async function probeBackend(){log('Backend probesi…');try{/*await fetch(`${API_BASE}/health`)*/await sleep(500);backendStat.textContent='ON';log('Backend cevap verdi.')}catch{backendStat.textContent='OFF';}}
 </script>
 </body>
 </html>
